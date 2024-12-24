@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISO Trivia Game by SCC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+    .question-container {
+      margin-bottom: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 5px;
+    }
+    .question {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .options button {
+      margin: 5px 0;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .correct {
+      background-color: #4caf50;
+      color: white;
+    }
+    .wrong {
+      background-color: #f44336;
+      color: white;
+    }
+    .feedback {
+      margin-top: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .result-container {
+      margin-top: 20px;
+      padding: 20px;
+      border: 2px solid #333;
+      background-color: #dff0d8;
+      text-align: center;
+      border-radius: 5px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ISO Trivia Game by SCC</h1>
+  <div id="game"></div>
+  <div id="result" class="result-container" style="display: none;"></div>
+  <script>
+    const questions = [
+      // Existing questions
+      { question: "Which ISO standard is specifically designed for food safety management systems?", options: ["ISO 22000", "ISO 45001", "ISO 14001"], answer: "ISO 22000" },
+      { question: "Which standard focuses on improving energy performance and reducing energy costs?", options: ["ISO 50001", "ISO 9001", "ISO 14001"], answer: "ISO 50001" },
+      { question: "Which standard ensures the security of sensitive data and information systems?", options: ["ISO 27001", "ISO 9001", "ISO 22000"], answer: "ISO 27001" },
+      { question: "Which ISO standard provides a framework for occupational health and safety management?", options: ["ISO 45001", "ISO 50001", "ISO 26000"], answer: "ISO 45001" },
+      { question: "Which standard focuses on reducing an organization’s environmental impact?", options: ["ISO 14001", "ISO 22000", "ISO 45001"], answer: "ISO 14001" },
+      { question: "Which ISO standard focuses on the implementation of AI management systems?", options: ["ISO 42001", "ISO 9001", "ISO 27001"], answer: "ISO 42001" },
+      { question: "Which ISO standard supports social responsibility and ethical practices?", options: ["ISO 26000", "ISO 45001", "ISO 50001"], answer: "ISO 26000" },
+      { question: "Which standard emphasizes customer satisfaction through quality management systems?", options: ["ISO 9001", "ISO 27001", "ISO 14001"], answer: "ISO 9001" },
+      { question: "Which standard is most used by the automotive sector for quality management?", options: ["IATF 16949", "ISO 9001", "ISO 14001"], answer: "IATF 16949" },
+      { question: "Which standard is a framework for achieving excellence in organizational performance?", options: ["EFQM", "ISO 9001", "ISO 50001"], answer: "EFQM" },
+
+      // New questions
+      { question: "This standard states: 'The organization shall establish, implement, and maintain an information security management system.'", options: ["ISO 27001", "ISO 50001", "ISO 9001"], answer: "ISO 27001" },
+      { question: "This standard requires: 'The organization shall determine the external and internal issues relevant to its purpose and that affect its ability to achieve the intended outcomes of its management system.'", options: ["ISO 9001", "ISO 14001", "ISO 45001"], answer: "ISO 9001" },
+      { question: "This standard includes: 'The organization shall plan, establish, and document objectives for improving energy performance.'", options: ["ISO 50001", "ISO 45001", "ISO 14001"], answer: "ISO 50001" },
+      { question: "This standard contains: 'The organization shall identify potential emergency situations and potential accidents that can impact food safety.'", options: ["ISO 22000", "ISO 45001", "ISO 9001"], answer: "ISO 22000" },
+      { question: "This standard specifies: 'The organization shall identify risks and opportunities to improve occupational health and safety performance.'", options: ["ISO 45001", "ISO 26000", "ISO 14001"], answer: "ISO 45001" },
+      { question: "This standard states: 'The organization shall establish and implement a policy to ensure its commitment to protecting the environment.'", options: ["ISO 14001", "ISO 9001", "ISO 50001"], answer: "ISO 14001" },
+      { question: "This standard requires: 'The organization shall identify stakeholders’ needs and expectations regarding social responsibility.'", options: ["ISO 26000", "ISO 45001", "ISO 9001"], answer: "ISO 26000" },
+      { question: "This standard includes: 'The organization shall ensure transparency and accountability in the deployment of AI technologies.'", options: ["ISO 42001", "ISO 27001", "ISO 14001"], answer: "ISO 42001" },
+      { question: "This standard specifies: 'The organization shall establish procedures for corrective and preventive actions in quality management systems.'", options: ["ISO 9001", "ISO 22000", "ISO 45001"], answer: "ISO 9001" },
+      { question: "This standard contains: 'The organization shall establish controls for food safety hazards throughout the food chain.'", options: ["ISO 22000", "ISO 14001", "ISO 45001"], answer: "ISO 22000" }
+    ];
+
+    // Function to shuffle an array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Shuffle answer options for each question
+    questions.forEach(q => shuffle(q.options));
+
+    let correctAnswers = 0;
+    const totalQuestions = questions.length;
+
+    const gameContainer = document.getElementById("game");
+    const resultContainer = document.getElementById("result");
+
+    questions.forEach((q, index) => {
+      const questionDiv = document.createElement("div");
+      questionDiv.className = "question-container";
+
+      const questionText = document.createElement("p");
+      questionText.className = "question";
+      questionText.textContent = `Question ${index + 1}: ${q.question}`;
+      questionDiv.appendChild(questionText);
+
+      const optionsDiv = document.createElement("div");
+      optionsDiv.className = "options";
+
+      q.options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.addEventListener("click", () => {
+          const feedback = document.createElement("div");
+          feedback.className = "feedback";
+          if (option === q.answer) {
+            feedback.textContent = "Correct!";
+            feedback.style.color = "green";
+            correctAnswers++;
+          } else {
+            feedback.textContent = "Wrong!";
+            feedback.style.color = "red";
+          }
+          questionDiv.appendChild(feedback);
+          [...optionsDiv.children].forEach(btn => (btn.disabled = true));
+
+          // Check if it's the last question
+          if (index === totalQuestions - 1) {
+            setTimeout(() => {
+              displayResults();
+            }, 1000);
+          }
+        });
+        optionsDiv.appendChild(button);
+      });
+
+      questionDiv.appendChild(optionsDiv);
+      gameContainer.appendChild(questionDiv);
+    });
+
+    function displayResults() {
+      gameContainer.style.display = "none";
+      resultContainer.style.display = "block";
+      resultContainer.textContent = `You got ${correctAnswers} out of ${totalQuestions} correct!`;
+    }
+  </script>
+</body>
+</html>
